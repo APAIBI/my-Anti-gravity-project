@@ -52,11 +52,12 @@ jobs:
       - name: Publish Direct APK to GitHub Releases
         if: github.ref == 'refs/heads/main'
         run: |
-          echo "Verifying APK output:"
-          ls -lh app/build/outputs/apk/debug/
+          echo "Verifying compiled APK:"
+          ls -lh app/build/outputs/apk/debug/app-debug.apk
+          echo "Uploading APK asset to release v1.0.0:"
+          gh release upload v1.0.0 app/build/outputs/apk/debug/app-debug.apk --clobber || \
           gh release create v1.0.0 app/build/outputs/apk/debug/app-debug.apk \
             --title "TalkBack Avatar App v1.0.0" \
-            --notes "Direct unzipped download for app-debug.apk. Includes all 4 avatars (Cat, Husky, Sakura, Elena) and working TalkBack speech revoicing." \
-            --clobber
+            --notes "Direct unzipped download for app-debug.apk. Includes all 4 avatars (Cat, Husky, Sakura, Elena) and working TalkBack speech revoicing."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
