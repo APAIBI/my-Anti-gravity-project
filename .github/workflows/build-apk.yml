@@ -46,16 +46,17 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: talkback-avatar-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: app/build/outputs/apk/debug/app-debug.apk
           retention-days: 14
 
       - name: Publish Direct APK to GitHub Releases
-        uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
-        with:
-          tag_name: v1.0.0
-          name: "TalkBack Avatar App v1.0.0"
-          body: "Direct download of app-debug.apk featuring Cat, Husky, Sakura, and Elena avatars with real-time TalkBack speech re-voicing."
-          files: app/build/outputs/apk/debug/*.apk
+        run: |
+          echo "Verifying APK output:"
+          ls -lh app/build/outputs/apk/debug/
+          gh release create v1.0.0 app/build/outputs/apk/debug/app-debug.apk \
+            --title "TalkBack Avatar App v1.0.0" \
+            --notes "Direct unzipped download for app-debug.apk. Includes all 4 avatars (Cat, Husky, Sakura, Elena) and working TalkBack speech revoicing." \
+            --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
