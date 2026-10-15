@@ -1,7 +1,9 @@
 package com.avatar.talkback.ui.state
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.avatar.talkback.audio.TalkBackAudioEngine
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -17,9 +19,7 @@ sealed interface AvatarUiEvent {
     object EnableToddlerLock : AvatarUiEvent
     object DismissToddlerLock : AvatarUiEvent
     data class SelectCharacter(val character: AvatarCharacter) : AvatarUiEvent
-    data class OnSpeechDetected(val audioLevel: Float) : AvatarUiEvent
-    data class OnSpeechFinished(val rawAudioChunk: ByteArray) : AvatarUiEvent
-    data class OnSynthesisProgress(val isSpeaking: Boolean) : AvatarUiEvent
+    data class TestSpeak(val text: String) : AvatarUiEvent
 }
 
 sealed interface AvatarUiEffect {
@@ -28,13 +28,58 @@ sealed interface AvatarUiEffect {
     object TriggerHapticHeavy : AvatarUiEffect
 }
 
-class AvatarViewModel : ViewModel() {
+class AvatarViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(AvatarUiState())
     val uiState: StateFlow<AvatarUiState> = _uiState.asStateFlow()
 
     private val _uiEffect = MutableSharedFlow<AvatarUiEffect>()
     val uiEffect: SharedFlow<AvatarUiEffect> = _uiEffect.asSharedFlow()
+
+    private val audioEngine = TalkBackAudioEngine(application, viewModelScope)
+
+    init {
+        // Collect listening status
+        viewModelScope.launch {
+            audioEngine.isListening.collect { listening ->
+                if (!_uiState.value.isMicEnabled) return@collect
+                if (!audioEngine.isSpeaking.value) {
+                    _uiState.update {
+                        it.copy(
+                            interactionState = if (listening) AvatarInteractionState.LISTENING else AvatarInteractionState.IDLE
+                        )
+                    }
+                }
+            }
+        }
+
+        // Collect speaking status
+        viewModelScope.launch {
+            audioEngine.isSpeaking.collect { speaking ->
+                _uiState.update {
+                    it.copy(
+                        interactionState = if (speaking) AvatarInteractionState.SPEAKING else AvatarInteractionState.IDLE
+                    )
+                }
+            }
+        }
+
+        // Collect real-time 60 FPS mouth viseme animation values
+        viewModelScope.launch {
+            audioEngine.mouthOpen.collect { mouthOpenVal ->
+                _uiState.update { it.copy(mouthOpenAmount = mouthOpenVal) }
+            }
+        }
+
+        // Collect recognized transcript
+        viewModelScope.launch {
+            audioEngine.lastTranscript.collect { text ->
+                if (text.isNotBlank()) {
+                    _uiState.update { it.copy(lastRecognizedText = text) }
+                }
+            }
+        }
+    }
 
     fun onEvent(event: AvatarUiEvent) {
         when (event) {
@@ -43,29 +88,22 @@ class AvatarViewModel : ViewModel() {
             is AvatarUiEvent.EnableToddlerLock -> handleEnableToddlerLock()
             is AvatarUiEvent.DismissToddlerLock -> handleDismissToddlerLock()
             is AvatarUiEvent.SelectCharacter -> handleSelectCharacter(event.character)
-            is AvatarUiEvent.OnSpeechDetected -> handleSpeechDetected(event.audioLevel)
-            is AvatarUiEvent.OnSpeechFinished -> handleSpeechFinished(event.rawAudioChunk)
-            is AvatarUiEvent.OnSynthesisProgress -> handleSynthesisProgress(event.isSpeaking)
+            is AvatarUiEvent.TestSpeak -> audioEngine.revoice(event.text)
         }
     }
 
     private fun handleToggleMic() {
         if (_uiState.value.isMicLocked) {
             viewModelScope.launch {
-                _uiEffect.emit(AvatarUiEffect.ShowToast("Microphone is locked. Unlock to change."))
+                _uiEffect.emit(AvatarUiEffect.ShowToast("Microphone is locked. Unlock small switch to toggle."))
                 _uiEffect.emit(AvatarUiEffect.TriggerHapticTap)
             }
             return
         }
 
-        _uiState.update { current ->
-            val newMicState = !current.isMicEnabled
-            current.copy(
-                isMicEnabled = newMicState,
-                interactionState = if (newMicState) AvatarInteractionState.IDLE else AvatarInteractionState.IDLE,
-                audioInputLevel = 0f
-            )
-        }
+        val newMicState = !_uiState.value.isMicEnabled
+        _uiState.update { it.copy(isMicEnabled = newMicState) }
+        audioEngine.setMicEnabled(newMicState)
         viewModelScope.launch { _uiEffect.emit(AvatarUiEffect.TriggerHapticTap) }
     }
 
@@ -85,36 +123,21 @@ class AvatarViewModel : ViewModel() {
     }
 
     private fun handleSelectCharacter(character: AvatarCharacter) {
-        if (_uiState.value.interactionState == AvatarInteractionState.SPEAKING) return
         _uiState.update { it.copy(currentAvatar = character) }
+        audioEngine.setCharacter(character)
+
+        // Character greeting in tailored persona voice
+        val greeting = when (character) {
+            AvatarCharacter.CAT -> "Meow! Speak to me, and I'll talk back!"
+            AvatarCharacter.HUSKY -> "Woof! Speak to me, I'm listening!"
+            AvatarCharacter.JAPANESE_TEEN -> "Hello! I am Sakura. Let's talk!"
+            AvatarCharacter.ADULT_FEMALE -> "Hello! Say something, and I'll repeat it back."
+        }
+        audioEngine.revoice(greeting)
     }
 
-    private fun handleSpeechDetected(level: Float) {
-        if (!_uiState.value.isMicEnabled) return
-        _uiState.update {
-            it.copy(
-                interactionState = AvatarInteractionState.LISTENING,
-                audioInputLevel = level
-            )
-        }
-    }
-
-    private fun handleSpeechFinished(rawAudioChunk: ByteArray) {
-        if (!_uiState.value.isMicEnabled) return
-        _uiState.update {
-            it.copy(
-                interactionState = AvatarInteractionState.PROCESSING,
-                audioInputLevel = 0f
-            )
-        }
-        // In real pipeline: AudioPipelineManager handles STT -> TTS -> triggers OnSynthesisProgress
-    }
-
-    private fun handleSynthesisProgress(isSpeaking: Boolean) {
-        _uiState.update {
-            it.copy(
-                interactionState = if (isSpeaking) AvatarInteractionState.SPEAKING else AvatarInteractionState.IDLE
-            )
-        }
+    override fun onCleared() {
+        super.onCleared()
+        audioEngine.release()
     }
 }

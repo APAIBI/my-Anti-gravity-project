@@ -6,49 +6,44 @@ import androidx.compose.runtime.Immutable
  * High-level state of the TalkBack interactive loop.
  */
 enum class AvatarInteractionState {
-    IDLE,       // Avatar breathes, blinks (2-6s), subtle saccades; waiting for speech
-    LISTENING,  // Mic active, speech detected by VAD, buffering audio input
-    PROCESSING, // Silence detected; STT transcription + TTS synthesis in progress
-    SPEAKING    // Streaming TTS audio playback + driving 60fps facial visemes
+    IDLE,       // Avatar breathes, blinks (2-6s), subtle micro-movements
+    LISTENING,  // Mic active, speech recognizer capturing user voice
+    PROCESSING, // Silence detected; processing speech to text
+    SPEAKING    // Streaming TTS voice + driving 60 FPS real-time facial mouth visemes
 }
 
 /**
- * Character identities with specific visual and vocal characteristics.
+ * The 4 Character Identities specified in the prompt.
  */
 enum class AvatarCharacter(
     val displayName: String,
     val description: String,
-    val voiceId: String,
-    val modelAssetPath: String
+    val personaTag: String
 ) {
     CAT(
-        displayName = "Domestic Cat",
-        description = "Hyper-realistic tabby with fur cards & eye dilation",
-        voiceId = "cat_whimsical_soft",
-        modelAssetPath = "models/cat_avatar.glb"
+        displayName = "Tabby Cat",
+        description = "Groomed fur, green-gold eyes, whisker twitches",
+        personaTag = "Whimsical & Soft Voice"
     ),
     HUSKY(
         displayName = "Siberian Husky",
-        description = "Realistic double-coat fur, ear twitches, and panting",
-        voiceId = "husky_energetic_playful",
-        modelAssetPath = "models/husky_avatar.glb"
+        description = "Heterochromia eyes, double-coat fur, ear twitches",
+        personaTag = "Energetic & Playful Voice"
     ),
     JAPANESE_TEEN(
-        displayName = "Sakura (Japanese Teen)",
-        description = "Kimono attire, delicate SSS skin shading, gentle demeanor",
-        voiceId = "sakura_warm_gentle",
-        modelAssetPath = "models/sakura_avatar.glb"
+        displayName = "Sakura",
+        description = "Floral kimono, gentle bob hair, natural demeanor",
+        personaTag = "Warm & Empathetic Voice"
     ),
     ADULT_FEMALE(
-        displayName = "Elena (Adult Female)",
-        description = "Cinematic studio presence, refined features, warm timbre",
-        voiceId = "elena_refined_warm",
-        modelAssetPath = "models/elena_avatar.glb"
+        displayName = "Elena",
+        description = "Ana de Armas styling, refined facial structure",
+        personaTag = "Sophisticated & Warm Voice"
     )
 }
 
 /**
- * Immutable UI State representing the complete screen and system state.
+ * Complete immutable screen state.
  */
 @Immutable
 data class AvatarUiState(
@@ -57,7 +52,8 @@ data class AvatarUiState(
     val isMicEnabled: Boolean = true,
     val isMicLocked: Boolean = false,
     val isToddlerLocked: Boolean = false,
-    val audioInputLevel: Float = 0f, // 0.0f to 1.0f for audio activity indicator
-    val speechTranscript: String = "",
+    val audioInputLevel: Float = 0f,
+    val mouthOpenAmount: Float = 0f, // 0.0f (closed) to 1.0f (open viseme)
+    val lastRecognizedText: String = "",
     val errorMessage: String? = null
 )
