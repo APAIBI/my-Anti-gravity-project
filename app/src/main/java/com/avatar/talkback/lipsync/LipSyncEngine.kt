@@ -117,7 +117,7 @@ class LipSyncEngine(
                 }
 
                 // Reset all mouth visemes to zero target
-                Viseme.values().forEach { v ->
+                Viseme.entries.forEach { v ->
                     targetWeights[v.blendshapeName] = 0f
                 }
 
@@ -136,7 +136,7 @@ class LipSyncEngine(
                         val smoothed = current + (target - current) * lerpFactor
                         currentWeights[shape] = smoothed
                     }
-                    onUpdateBlendshapes(HashMap(currentWeights))
+                    onUpdateBlendshapes(currentWeights.toMap())
                 }
 
                 delay(16) // 60 FPS interpolation

@@ -1,5 +1,6 @@
 package com.avatar.talkback.audio
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.media.AudioFormat
 import android.media.AudioRecord
@@ -43,6 +44,7 @@ class AudioPipelineManager(
     private var noiseSuppressor: NoiseSuppressor? = null
     private var echoCanceler: AcousticEchoCanceler? = null
 
+    @SuppressLint("MissingPermission")
     fun startListening(character: AvatarCharacter) {
         if (isCapturing) return
         isCapturing = true
@@ -59,10 +61,10 @@ class AudioPipelineManager(
 
                 val audioSessionId = audioRecord?.audioSessionId ?: 0
                 if (NoiseSuppressor.isAvailable()) {
-                    noiseSuppressor = NoiseSuppressor.create(audioSessionId)?.apply { enabled = true }
+                    noiseSuppressor = NoiseSuppressor.create(audioSessionId)?.apply { setEnabled(true) }
                 }
                 if (AcousticEchoCanceler.isAvailable()) {
-                    echoCanceler = AcousticEchoCanceler.create(audioSessionId)?.apply { enabled = true }
+                    echoCanceler = AcousticEchoCanceler.create(audioSessionId)?.apply { setEnabled(true) }
                 }
 
                 audioRecord?.startRecording()
