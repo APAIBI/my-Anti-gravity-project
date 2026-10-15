@@ -42,24 +42,27 @@ jobs:
           tail -n 150 build.log >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
+      - name: Prepare Version 2 APK File
+        run: |
+          echo "Copying built APK to root as TalkBack-Avatar-v2.apk:"
+          cp app/build/outputs/apk/debug/app-debug.apk TalkBack-Avatar-v2.apk
+          ls -lh TalkBack-Avatar-v2.apk
+
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: talkback-avatar-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: TalkBack-Avatar-v2-apk
+          path: TalkBack-Avatar-v2.apk
           retention-days: 14
 
-      - name: Publish Direct APK to GitHub Releases
+      - name: Publish Version 2 Release with Direct APK
+        uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
-        continue-on-error: true
-        run: |
-          echo "Verifying compiled APK:"
-          ls -lh app/build/outputs/apk/debug/app-debug.apk
-          echo "Uploading APK to GitHub Releases:"
-          gh release upload v1.0.0 app/build/outputs/apk/debug/app-debug.apk --clobber || \
-          gh release create v1.0.0 app/build/outputs/apk/debug/app-debug.apk \
-            --title "TalkBack Avatar App v1.0.0" \
-            --notes "Direct unzipped download for app-debug.apk. Includes all 4 avatars (Cat, Husky, Sakura, Elena) and working TalkBack speech revoicing." \
-            --clobber
+        with:
+          tag_name: v2.0
+          name: "TalkBack Avatar App Version 2"
+          body: "Direct download of TalkBack-Avatar-v2.apk. Includes all 4 animated avatars (Cat, Husky, Sakura, Elena) and functional TalkBack speech revoicing."
+          files: TalkBack-Avatar-v2.apk
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
