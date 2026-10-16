@@ -50,6 +50,7 @@ class TalkBackAudioEngine(
     val lastTranscript: StateFlow<String> = _lastTranscript.asStateFlow()
 
     private var lipSyncAnimationJob: Job? = null
+    private var speechWatchdogJob: Job? = null
     private var currentCharacter = AvatarCharacter.CAT
     private var isMicEnabled = true
 
@@ -69,6 +70,7 @@ class TalkBackAudioEngine(
                 }
 
                 override fun onDone(utteranceId: String?) {
+                    speechWatchdogJob?.cancel()
                     _isSpeaking.value = false
                     stopLipSyncAnimation()
                     // Resume listening automatically after speaking
@@ -81,6 +83,7 @@ class TalkBackAudioEngine(
                 }
 
                 override fun onError(utteranceId: String?) {
+                    speechWatchdogJob?.cancel()
                     _isSpeaking.value = false
                     stopLipSyncAnimation()
                     if (isMicEnabled) {
@@ -218,11 +221,35 @@ class TalkBackAudioEngine(
             }
         }
 
-        textToSpeech?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "TALKBACK_UTTERANCE")
+        val utteranceId = "TALKBACK_${System.currentTimeMillis()}"
+        val params = Bundle().apply {
+            putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utteranceId)
+        }
+
+        // Immediately trigger speaking state and real-time lip movement
+        _isSpeaking.value = true
+        startLipSyncAnimation()
+
+        // Estimated speech duration watchdog
+        val estimatedDurationMs = (text.length * 70L).coerceIn(1500L, 12000L)
+        speechWatchdogJob?.cancel()
+        speechWatchdogJob = scope.launch(Dispatchers.Main) {
+            delay(estimatedDurationMs)
+            if (_isSpeaking.value) {
+                _isSpeaking.value = false
+                stopLipSyncAnimation()
+                if (isMicEnabled) {
+                    delay(300)
+                    startListening()
+                }
+            }
+        }
+
+        textToSpeech?.speak(text, TextToSpeech.QUEUE_FLUSH, params, utteranceId)
     }
 
     /**
-     * Drives real-time mouth movement at 60 FPS in sync with the speech playback.
+     * Drives real-time mouth movement in sync with speech playback.
      */
     private fun startLipSyncAnimation() {
         lipSyncAnimationJob?.cancel()
@@ -230,13 +257,13 @@ class TalkBackAudioEngine(
             var step = 0
             while (isActive && _isSpeaking.value) {
                 step++
-                // Multi-frequency wave simulating syllabic mouth opening
-                val wave1 = (sin(step * 0.45) + 1.0) / 2.0
-                val wave2 = (sin(step * 0.18) + 1.0) / 2.0
-                val combined = ((wave1 * 0.7 + wave2 * 0.3) * 0.85).toFloat()
+                // Multi-frequency wave simulating natural syllabic mouth opening and closing
+                val syllable = (sin(step * 0.38) + 1.0) / 2.0
+                val vowelOpen = (sin(step * 0.16) + 1.0) / 2.0
+                val combined = ((syllable * 0.70 + vowelOpen * 0.30) * 1.15).toFloat()
 
-                _mouthOpen.value = combined.coerceIn(0.05f, 1.0f)
-                delay(20) // ~50-60 FPS
+                _mouthOpen.value = combined.coerceIn(0.0f, 1.0f)
+                delay(28) // ~35 FPS realistic talking speed
             }
             _mouthOpen.value = 0f
         }
@@ -248,6 +275,7 @@ class TalkBackAudioEngine(
     }
 
     fun release() {
+        speechWatchdogJob?.cancel()
         speechRecognizer?.destroy()
         textToSpeech?.stop()
         textToSpeech?.shutdown()
