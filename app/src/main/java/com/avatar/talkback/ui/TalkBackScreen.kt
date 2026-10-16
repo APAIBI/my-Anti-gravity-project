@@ -166,7 +166,7 @@ private fun CharacterSelectorBar(
             .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(24.dp))
             .padding(4.dp)
     ) {
-        AvatarCharacter.values().forEach { character ->
+        AvatarCharacter.entries.forEach { character ->
             val isSelected = character == selected
             val iconEmoji = when (character) {
                 AvatarCharacter.CAT -> "🐱 Cat"

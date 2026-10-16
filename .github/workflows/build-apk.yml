@@ -31,7 +31,9 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Debug APK
+        shell: bash
         run: |
+          set -eo pipefail
           ./gradlew assembleDebug --stacktrace --no-daemon 2>&1 | tee build.log
 
       - name: Publish Failure Logs to Summary
@@ -44,8 +46,14 @@ jobs:
 
       - name: Prepare Version 2 APK File
         run: |
-          echo "Copying built APK to root as TalkBack-Avatar-v2.apk:"
-          cp app/build/outputs/apk/debug/app-debug.apk TalkBack-Avatar-v2.apk
+          echo "Locating and copying built APK to root as TalkBack-Avatar-v2.apk:"
+          APK_FILE=$(find app/build/outputs/apk -name "*.apk" | head -n 1)
+          if [ -z "$APK_FILE" ] || [ ! -f "$APK_FILE" ]; then
+            echo "Error: No APK file was found under app/build/outputs/apk!"
+            exit 1
+          fi
+          echo "Found APK at: $APK_FILE"
+          cp "$APK_FILE" TalkBack-Avatar-v2.apk
           ls -lh TalkBack-Avatar-v2.apk
 
       - name: Upload Debug APK Artifact

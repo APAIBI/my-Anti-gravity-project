@@ -145,9 +145,9 @@ private fun DrawScope.drawCatAvatar(
     // Soft Studio Rim Lighting & Shoulders
     val bodyPath = Path().apply {
         moveTo(cx - headRadius * 1.3f, size.height)
-        quadraticTo(cx - headRadius * 0.9f, cy + headRadius * 0.8f, cx - headRadius * 0.7f, cy + headRadius * 0.6f)
+        quadraticBezierTo(cx - headRadius * 0.9f, cy + headRadius * 0.8f, cx - headRadius * 0.7f, cy + headRadius * 0.6f)
         lineTo(cx + headRadius * 0.7f, cy + headRadius * 0.6f)
-        quadraticTo(cx + headRadius * 0.9f, cy + headRadius * 0.8f, cx + headRadius * 1.3f, size.height)
+        quadraticBezierTo(cx + headRadius * 0.9f, cy + headRadius * 0.8f, cx + headRadius * 1.3f, size.height)
         close()
     }
     drawPath(
@@ -238,8 +238,8 @@ private fun DrawScope.drawCatAvatar(
         // Open Mouth during TalkBack Speech
         val openMouthPath = Path().apply {
             moveTo(cx - 30f, mouthY)
-            quadraticTo(cx, mouthY + dynamicMouthOpenPx * 1.4f, cx + 30f, mouthY)
-            quadraticTo(cx, mouthY + dynamicMouthOpenPx * 0.3f, cx - 30f, mouthY)
+            quadraticBezierTo(cx, mouthY + dynamicMouthOpenPx * 1.4f, cx + 30f, mouthY)
+            quadraticBezierTo(cx, mouthY + dynamicMouthOpenPx * 0.3f, cx - 30f, mouthY)
             close()
         }
         drawPath(openMouthPath, Color(0xFF3E1B1B))
@@ -253,11 +253,11 @@ private fun DrawScope.drawCatAvatar(
         // Closed W-shaped cat muzzle
         val leftMuzzle = Path().apply {
             moveTo(cx, mouthY)
-            quadraticTo(cx - 22f, mouthY + 16f, cx - 44f, mouthY + 8f)
+            quadraticBezierTo(cx - 22f, mouthY + 16f, cx - 44f, mouthY + 8f)
         }
         val rightMuzzle = Path().apply {
             moveTo(cx, mouthY)
-            quadraticTo(cx + 22f, mouthY + 16f, cx + 44f, mouthY + 8f)
+            quadraticBezierTo(cx + 22f, mouthY + 16f, cx + 44f, mouthY + 8f)
         }
         drawPath(leftMuzzle, Color(0xFF261A15), style = Stroke(width = 5f, cap = StrokeCap.Round))
         drawPath(rightMuzzle, Color(0xFF261A15), style = Stroke(width = 5f, cap = StrokeCap.Round))
@@ -332,9 +332,9 @@ private fun DrawScope.drawHuskyAvatar(
     // Husky Shoulders & Thick Double Coat
     val bodyPath = Path().apply {
         moveTo(cx - headRadius * 1.35f, size.height)
-        quadraticTo(cx - headRadius, cy + headRadius * 0.8f, cx - headRadius * 0.7f, cy + headRadius * 0.6f)
+        quadraticBezierTo(cx - headRadius, cy + headRadius * 0.8f, cx - headRadius * 0.7f, cy + headRadius * 0.6f)
         lineTo(cx + headRadius * 0.7f, cy + headRadius * 0.6f)
-        quadraticTo(cx + headRadius, cy + headRadius * 0.8f, cx + headRadius * 1.35f, size.height)
+        quadraticBezierTo(cx + headRadius, cy + headRadius * 0.8f, cx + headRadius * 1.35f, size.height)
         close()
     }
     drawPath(bodyPath, Brush.verticalGradient(listOf(Color(0xFF424242), Color(0xFF1E1E1E))))
@@ -357,10 +357,10 @@ private fun DrawScope.drawHuskyAvatar(
     // Distinct White Husky Facial Mask
     val maskPath = Path().apply {
         moveTo(cx, cy - headRadius * 0.65f)
-        quadraticTo(cx - headRadius * 0.35f, cy - headRadius * 0.25f, cx - headRadius * 0.75f, cy + headRadius * 0.15f)
-        quadraticTo(cx - headRadius * 0.6f, cy + headRadius * 0.75f, cx, cy + headRadius * 0.82f)
-        quadraticTo(cx + headRadius * 0.6f, cy + headRadius * 0.75f, cx + headRadius * 0.75f, cy + headRadius * 0.15f)
-        quadraticTo(cx + headRadius * 0.35f, cy - headRadius * 0.25f, cx, cy - headRadius * 0.65f)
+        quadraticBezierTo(cx - headRadius * 0.35f, cy - headRadius * 0.25f, cx - headRadius * 0.75f, cy + headRadius * 0.15f)
+        quadraticBezierTo(cx - headRadius * 0.6f, cy + headRadius * 0.75f, cx, cy + headRadius * 0.82f)
+        quadraticBezierTo(cx + headRadius * 0.6f, cy + headRadius * 0.75f, cx + headRadius * 0.75f, cy + headRadius * 0.15f)
+        quadraticBezierTo(cx + headRadius * 0.35f, cy - headRadius * 0.25f, cx, cy - headRadius * 0.65f)
         close()
     }
     drawPath(maskPath, Color(0xFFF5F5F5))
@@ -412,7 +412,7 @@ private fun DrawScope.drawHuskyAvatar(
         // Open Bark/Talk Mouth
         val mouthPath = Path().apply {
             moveTo(cx - 45f, mouthY)
-            quadraticTo(cx, mouthY + dynamicMouth * 1.5f, cx + 45f, mouthY)
+            quadraticBezierTo(cx, mouthY + dynamicMouth * 1.5f, cx + 45f, mouthY)
             close()
         }
         drawPath(mouthPath, Color(0xFF2E1212))
@@ -433,7 +433,7 @@ private fun DrawScope.drawHuskyAvatar(
         )
         val smilePath = Path().apply {
             moveTo(cx - 38f, mouthY - 4f)
-            quadraticTo(cx, mouthY + 12f, cx + 38f, mouthY - 4f)
+            quadraticBezierTo(cx, mouthY + 12f, cx + 38f, mouthY - 4f)
         }
         drawPath(smilePath, Color(0xFF212121), style = Stroke(width = 6f, cap = StrokeCap.Round))
     }
@@ -521,9 +521,9 @@ private fun DrawScope.drawSakuraAvatar(
     // Face Oval: Subsurface scattering soft skin tone
     val facePath = Path().apply {
         moveTo(cx - headRadius * 0.72f, cy - headRadius * 0.3f)
-        quadraticTo(cx - headRadius * 0.70f, cy + headRadius * 0.5f, cx, cy + headRadius * 0.85f)
-        quadraticTo(cx + headRadius * 0.70f, cy + headRadius * 0.5f, cx + headRadius * 0.72f, cy - headRadius * 0.3f)
-        quadraticTo(cx, cy - headRadius * 1.05f, cx - headRadius * 0.72f, cy - headRadius * 0.3f)
+        quadraticBezierTo(cx - headRadius * 0.70f, cy + headRadius * 0.5f, cx, cy + headRadius * 0.85f)
+        quadraticBezierTo(cx + headRadius * 0.70f, cy + headRadius * 0.5f, cx + headRadius * 0.72f, cy - headRadius * 0.3f)
+        quadraticBezierTo(cx, cy - headRadius * 1.05f, cx - headRadius * 0.72f, cy - headRadius * 0.3f)
         close()
     }
     drawPath(
@@ -549,7 +549,7 @@ private fun DrawScope.drawSakuraAvatar(
         // Eyelash curve
         val lashPath = Path().apply {
             moveTo(eyeX - eyeW * 1.2f, eyeOffsetY - eyeH * 0.8f)
-            quadraticTo(eyeX, eyeOffsetY - eyeH * 1.4f, eyeX + eyeW * 1.2f, eyeOffsetY - eyeH * 0.6f)
+            quadraticBezierTo(eyeX, eyeOffsetY - eyeH * 1.4f, eyeX + eyeW * 1.2f, eyeOffsetY - eyeH * 0.6f)
         }
         drawPath(lashPath, Color(0xFF1E1714), style = Stroke(width = 4.5f, cap = StrokeCap.Round))
 
@@ -586,8 +586,8 @@ private fun DrawScope.drawSakuraAvatar(
         // Speaking Viseme
         val lipPath = Path().apply {
             moveTo(cx - 24f, mouthY)
-            quadraticTo(cx, mouthY + dynamicMouth * 1.2f, cx + 24f, mouthY)
-            quadraticTo(cx, mouthY - dynamicMouth * 0.3f, cx - 24f, mouthY)
+            quadraticBezierTo(cx, mouthY + dynamicMouth * 1.2f, cx + 24f, mouthY)
+            quadraticBezierTo(cx, mouthY - dynamicMouth * 0.3f, cx - 24f, mouthY)
             close()
         }
         drawPath(lipPath, Color(0xFFD81B60))
@@ -595,7 +595,7 @@ private fun DrawScope.drawSakuraAvatar(
         // Natural gentle closed smile
         val smilePath = Path().apply {
             moveTo(cx - 20f, mouthY)
-            quadraticTo(cx, mouthY + 6f, cx + 20f, mouthY)
+            quadraticBezierTo(cx, mouthY + 6f, cx + 20f, mouthY)
         }
         drawPath(smilePath, Color(0xFFE91E63), style = Stroke(width = 4f, cap = StrokeCap.Round))
     }
@@ -605,7 +605,7 @@ private fun DrawScope.drawSakuraAvatar(
         val bx = cx + (i * 26f)
         val strandPath = Path().apply {
             moveTo(bx, cy - headRadius * 0.95f)
-            quadraticTo(bx + (i * 8f), cy - headRadius * 0.45f, bx + (i * 14f), cy - headRadius * 0.18f)
+            quadraticBezierTo(bx + (i * 8f), cy - headRadius * 0.45f, bx + (i * 14f), cy - headRadius * 0.18f)
         }
         drawPath(strandPath, Color(0xFF2C221E), style = Stroke(width = 22f, cap = StrokeCap.Round))
     }
@@ -654,9 +654,9 @@ private fun DrawScope.drawElenaAvatar(
     // Sculpted Jawline & Cheekbones (Ana de Armas likeness)
     val facePath = Path().apply {
         moveTo(cx - headRadius * 0.72f, cy - headRadius * 0.35f)
-        quadraticTo(cx - headRadius * 0.68f, cy + headRadius * 0.45f, cx, cy + headRadius * 0.88f)
-        quadraticTo(cx + headRadius * 0.68f, cy + headRadius * 0.45f, cx + headRadius * 0.72f, cy - headRadius * 0.35f)
-        quadraticTo(cx, cy - headRadius * 1.05f, cx - headRadius * 0.72f, cy - headRadius * 0.35f)
+        quadraticBezierTo(cx - headRadius * 0.68f, cy + headRadius * 0.45f, cx, cy + headRadius * 0.88f)
+        quadraticBezierTo(cx + headRadius * 0.68f, cy + headRadius * 0.45f, cx + headRadius * 0.72f, cy - headRadius * 0.35f)
+        quadraticBezierTo(cx, cy - headRadius * 1.05f, cx - headRadius * 0.72f, cy - headRadius * 0.35f)
         close()
     }
     drawPath(
@@ -682,7 +682,7 @@ private fun DrawScope.drawElenaAvatar(
         // Eyeliner
         val linerPath = Path().apply {
             moveTo(eyeX - eyeW * 1.2f, eyeOffsetY - eyeH * 0.7f)
-            quadraticTo(eyeX, eyeOffsetY - eyeH * 1.3f, eyeX + eyeW * 1.35f, eyeOffsetY - eyeH * 0.85f)
+            quadraticBezierTo(eyeX, eyeOffsetY - eyeH * 1.3f, eyeX + eyeW * 1.35f, eyeOffsetY - eyeH * 0.85f)
         }
         drawPath(linerPath, Color(0xFF1A1A1A), style = Stroke(width = 5f, cap = StrokeCap.Round))
 
@@ -708,7 +708,7 @@ private fun DrawScope.drawElenaAvatar(
     val nosePath = Path().apply {
         moveTo(cx - 3f, cy + headRadius * 0.05f)
         lineTo(cx - 5f, cy + headRadius * 0.28f)
-        quadraticTo(cx, cy + headRadius * 0.32f, cx + 5f, cy + headRadius * 0.28f)
+        quadraticBezierTo(cx, cy + headRadius * 0.32f, cx + 5f, cy + headRadius * 0.28f)
     }
     drawPath(nosePath, Color(0xFFBCAAA4), style = Stroke(width = 3.5f, cap = StrokeCap.Round))
 
@@ -720,8 +720,8 @@ private fun DrawScope.drawElenaAvatar(
         // Open Speech Viseme
         val openMouthPath = Path().apply {
             moveTo(cx - 32f, mouthY)
-            quadraticTo(cx, mouthY + dynamicMouth * 1.3f, cx + 32f, mouthY)
-            quadraticTo(cx, mouthY - dynamicMouth * 0.3f, cx - 32f, mouthY)
+            quadraticBezierTo(cx, mouthY + dynamicMouth * 1.3f, cx + 32f, mouthY)
+            quadraticBezierTo(cx, mouthY - dynamicMouth * 0.3f, cx - 32f, mouthY)
             close()
         }
         drawPath(openMouthPath, Color(0xFF880E4F))
@@ -735,13 +735,13 @@ private fun DrawScope.drawElenaAvatar(
         // Full Natural Nude-Rose Lips
         val upperLip = Path().apply {
             moveTo(cx - 28f, mouthY)
-            quadraticTo(cx - 10f, mouthY - 8f, cx, mouthY - 4f)
-            quadraticTo(cx + 10f, mouthY - 8f, cx + 28f, mouthY)
+            quadraticBezierTo(cx - 10f, mouthY - 8f, cx, mouthY - 4f)
+            quadraticBezierTo(cx + 10f, mouthY - 8f, cx + 28f, mouthY)
             close()
         }
         val lowerLip = Path().apply {
             moveTo(cx - 28f, mouthY)
-            quadraticTo(cx, mouthY + 14f, cx + 28f, mouthY)
+            quadraticBezierTo(cx, mouthY + 14f, cx + 28f, mouthY)
             close()
         }
         drawPath(upperLip, Color(0xFFC2185B))
@@ -752,11 +752,11 @@ private fun DrawScope.drawElenaAvatar(
     val hairStrandColor = Color(0xFF2D1E17)
     val strandL = Path().apply {
         moveTo(cx - headRadius * 0.8f, cy - headRadius * 0.7f)
-        quadraticTo(cx - headRadius * 0.95f, cy + headRadius * 0.3f, cx - headRadius * 0.7f, cy + headRadius * 0.9f)
+        quadraticBezierTo(cx - headRadius * 0.95f, cy + headRadius * 0.3f, cx - headRadius * 0.7f, cy + headRadius * 0.9f)
     }
     val strandR = Path().apply {
         moveTo(cx + headRadius * 0.75f, cy - headRadius * 0.7f)
-        quadraticTo(cx + headRadius * 0.90f, cy + headRadius * 0.3f, cx + headRadius * 0.65f, cy + headRadius * 0.9f)
+        quadraticBezierTo(cx + headRadius * 0.90f, cy + headRadius * 0.3f, cx + headRadius * 0.65f, cy + headRadius * 0.9f)
     }
     drawPath(strandL, hairStrandColor, style = Stroke(width = 24f, cap = StrokeCap.Round))
     drawPath(strandR, hairStrandColor, style = Stroke(width = 24f, cap = StrokeCap.Round))
